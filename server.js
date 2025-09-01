@@ -26,7 +26,11 @@ app.post("/users", (req, res) => {
 })
   app.post("/orders", (req, res) => {
     const { price, user_id } = req.body;
-    const query = `INSERT INTO users (price ,user_id) VALUES ($1,$2) RETURNING id,price,user_id,created_at  `;
+    console.log(req);
+    
+    const query = `INSERT INTO orders (price ,user_id) VALUES ($1,$2) RETURNING *  `;
+    console.log(price,user_id);
+    
     const order = [price, user_id];
     pool.query(query,order)
     .then((result) => {
@@ -48,6 +52,28 @@ app.post("/users", (req, res) => {
     
 
   });
+  app.delete("/orders/:id",(req,res)=>{
+    const orderId =req.params.user_id
+    const order= `DELETE FROM orders WHERE user_id= $1 RETURNING *`
+    pool.query(order,[orderId])
+
+    .then((result) => {
+    
+        res
+          .status(201)
+          .json({
+            message: "order deleted",
+            user: result.rows,
+          }) 
+      })
+      .catch((err) => {
+        res.status(400).json({
+          message: err.message,
+        });
+      });
+    
+
+  })
 
 
 const PORT = 5000;
